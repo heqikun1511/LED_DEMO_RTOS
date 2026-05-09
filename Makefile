@@ -75,6 +75,7 @@ App/Src/interrupt_demo.c \
 App/Src/lcd_demo.c \
 App/Src/lvgl_demo.c \
 Drivers/BSP/Src/bsp_can.c \
+Drivers/BSP/Src/can_data.c \
 Drivers/BSP/Src/delay.c \
 Drivers/BSP/Src/lcd.c \
 Drivers/BSP/Src/lcd_ex.c \
