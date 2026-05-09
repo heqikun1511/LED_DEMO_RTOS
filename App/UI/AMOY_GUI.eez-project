@@ -10,7 +10,7 @@
       "lvglVersion": "9.5.0",
       "extensions": [],
       "imports": [],
-      "flowSupport": true,
+      "flowSupport": false,
       "displayWidth": 800,
       "displayHeight": 480,
       "displayBorderRadius": 0,
@@ -114,7 +114,8 @@
         "name": "progress",
         "type": "integer",
         "defaultValue": "0",
-        "persistent": false
+        "persistent": false,
+        "native": true
       }
     ],
     "structures": [],

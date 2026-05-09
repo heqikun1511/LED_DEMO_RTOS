@@ -4,7 +4,6 @@
     "selectedGlobalVariableObject": "[AMOY_GUI.eez-project]:/variables/globalVariables/0",
     "selectedStyleObject": "[AMOY_GUI.eez-project]:/lvglStyles/styles/1",
     "selectedThemeColorObject": "[AMOY_GUI.eez-project]:/colors/0",
-    "selectedBitmapObject": "[AMOY_GUI.eez-project]:/bitmaps/0",
     "subnavigationSelectedItems": {
       "variables-tab/sub-navigation/selected-item": "Global"
     }
@@ -70,14 +69,6 @@
                 "component": "lvgl-groups",
                 "enableClose": false,
                 "icon": "material:view_compact"
-              },
-              {
-                "type": "tab",
-                "id": "BREAKPOINTS_PALETTE",
-                "name": "Breakpoints",
-                "component": "breakpointsPanel",
-                "enableClose": false,
-                "icon": "svg:breakpoints_panel"
               }
             ]
           },
@@ -203,21 +194,9 @@
               "type": "tabset",
               "id": "EDITORS",
               "weight": 53.35113902713788,
-              "selected": 1,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
-                {
-                  "type": "tab",
-                  "id": "#1201d0ad-dc51-4ffb-bb4a-d5f0bf03d0d2",
-                  "name": "start up",
-                  "component": "editor",
-                  "config": {
-                    "objectPath": "[AMOY_GUI.eez-project]:/userPages/1",
-                    "permanent": false
-                  },
-                  "icon": "svg:page"
-                },
                 {
                   "type": "tab",
                   "id": "#26b9fb95-3a94-4c9a-9937-259f6b3d4e4d",
@@ -1097,13 +1076,16 @@
       "selectionFront": {},
       "selectionBack": {
         "0": {
-          "0": {}
+          "0": {},
+          "10": {
+            "$selected": true
+          }
         }
       },
       "transform": {
         "translate": {
           "x": -365.4557857513428,
-          "y": -244.5
+          "y": 763.5000240325935
         },
         "scale": 1
       },

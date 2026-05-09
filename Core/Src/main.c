@@ -31,7 +31,7 @@
 
 #include "interrupt_demo.h"
 #include "lcd.h"
-#include "sram.h"
+//#include "sram.h"
 
 /* USER CODE END Includes */
 
@@ -188,6 +188,10 @@ void SystemClock_Config(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
+  HAL_CAN_RxFifo0MsgPendingCallback(&hcan);
+
+
+  
 
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM6)
