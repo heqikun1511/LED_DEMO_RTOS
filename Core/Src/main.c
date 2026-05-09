@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "can.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -30,6 +31,7 @@
 
 #include "interrupt_demo.h"
 #include "lcd.h"
+#include "sram.h"
 
 /* USER CODE END Includes */
 
@@ -58,6 +60,8 @@
 void SystemClock_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
+void SRAM_Init(void);
+
 
 /* USER CODE END PFP */
 
@@ -99,12 +103,14 @@ int main(void)
   MX_TIM5_Init();
   MX_USART1_UART_Init();
   MX_FSMC_Init();
+  MX_CAN_Init();
   /* USER CODE BEGIN 2 */
   lcd_init();
   lcd_display_dir(1U);
   
   printf("LCD init done, ID: %04lX\r\n", (unsigned long)lcddev.id);
   printf("LCD size: %u x %u\r\n", lcddev.width, lcddev.height);
+  can_filter_init();
 
   /* USER CODE END 2 */
 

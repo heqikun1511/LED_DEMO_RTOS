@@ -11,6 +11,7 @@
 #define LVGL_DEMO_MAX_HOR_RES 800U
 #define LVGL_DEMO_TICK_PERIOD_MS 5U
 
+/* LVGL display buffer in internal RAM */
 static uint8_t lvgl_draw_buf[LVGL_DEMO_MAX_HOR_RES * LVGL_DEMO_BUF_LINES * 2U];
 
 static void lvgl_lcd_flush_cb(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map)
