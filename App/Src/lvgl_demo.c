@@ -7,11 +7,13 @@
 #include "lvgl.h"
 #include "ui.h"
 
-#define LVGL_DEMO_BUF_LINES 4U
+#define LVGL_DEMO_BUF_LINES 8U
 #define LVGL_DEMO_MAX_HOR_RES 800U
 #define LVGL_DEMO_TICK_PERIOD_MS 5U
+#define EXT_SRAM_BASE       0x6C000000
 
-static uint8_t lvgl_draw_buf[LVGL_DEMO_MAX_HOR_RES * LVGL_DEMO_BUF_LINES * 2U];
+/* LVGL display buffer allocated in external SRAM (FSMC Bank4) */
+static uint8_t *lvgl_draw_buf = (uint8_t *)EXT_SRAM_BASE;
 
 static void lvgl_lcd_flush_cb(lv_display_t *disp, const lv_area_t *area, uint8_t *px_map)
 {
@@ -50,7 +52,7 @@ void lvgl_demo_task(void *argument)
   lv_display_t *display = lv_display_create(lcddev.width, lcddev.height);
   lv_display_set_color_format(display, LV_COLOR_FORMAT_RGB565);
   lv_display_set_flush_cb(display, lvgl_lcd_flush_cb);
-  lv_display_set_buffers(display, lvgl_draw_buf, NULL, sizeof(lvgl_draw_buf), LV_DISPLAY_RENDER_MODE_PARTIAL);
+  lv_display_set_buffers(display, lvgl_draw_buf, NULL, lcddev.width * LVGL_DEMO_BUF_LINES * sizeof(lv_color_t), LV_DISPLAY_RENDER_MODE_PARTIAL);
 
   ui_init();
 
