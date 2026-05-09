@@ -1,4 +1,4 @@
 [submodule "Middlewares/Third_Party/LVGL/lvgl"]
 	path = Middlewares/Third_Party/LVGL/lvgl
-	url = git@github.com:SpartanTan/lvgl.git
+	url = https://github.com/SpartanTan/lvgl.git
 	branch = trimmed/9.5.0
