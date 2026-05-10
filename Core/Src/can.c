@@ -87,8 +87,13 @@ void HAL_CAN_MspInit(CAN_HandleTypeDef* canHandle)
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /* USER CODE BEGIN CAN1_MspInit 1 */
+    /* 设置 CAN RX 中断优先级: 高于 FreeRTOS 系统调用阈值(5), 但不抢占更关键的中断 */
+    HAL_NVIC_SetPriority(USB_LP_CAN1_RX0_IRQn, 3, 0);
+    HAL_NVIC_EnableIRQ(USB_LP_CAN1_RX0_IRQn);
 
-  /* USER CODE END CAN1_MspInit 1 */
+    HAL_NVIC_SetPriority(CAN1_RX1_IRQn, 3, 0);
+    HAL_NVIC_EnableIRQ(CAN1_RX1_IRQn);
+    /* USER CODE END CAN1_MspInit 1 */
   }
 }
 

@@ -57,15 +57,31 @@ void can_filter_init(void)
     Error_Handler();
   }
 
-  /* --- Filter 1: 接收 MCU→VCU (0x0CFFC7EF) --- */
+  /* --- Filter 1: 接收 MCU→VCU (0x0CFFC7EF) → FIFO0 --- */
   filter.FilterBank = 1;
   filter.FilterIdHigh = (uint16_t)(CAN_ID_MCU2VCU >> 13);
   filter.FilterIdLow = (uint16_t)((CAN_ID_MCU2VCU << 3) | (0x02 << 2));
+  filter.FilterFIFOAssignment = CAN_RX_FIFO0;
 
   if (HAL_CAN_ConfigFilter(&hcan, &filter) != HAL_OK)
   {
     Error_Handler();
   }
+
+  /* --- Filter 2: 同样两个 ID 镜像到 FIFO1 (双缓冲防丢帧) --- */
+  filter.FilterBank = 2;
+  filter.FilterIdHigh = (uint16_t)(CAN_ID_VCU2MCU >> 13);
+  filter.FilterIdLow = (uint16_t)((CAN_ID_VCU2MCU << 3) | (0x02 << 2));
+  filter.FilterFIFOAssignment = CAN_RX_FIFO1;
+  if (HAL_CAN_ConfigFilter(&hcan, &filter) != HAL_OK)
+    Error_Handler();
+
+  filter.FilterBank = 3;
+  filter.FilterIdHigh = (uint16_t)(CAN_ID_MCU2VCU >> 13);
+  filter.FilterIdLow = (uint16_t)((CAN_ID_MCU2VCU << 3) | (0x02 << 2));
+  filter.FilterFIFOAssignment = CAN_RX_FIFO1;
+  if (HAL_CAN_ConfigFilter(&hcan, &filter) != HAL_OK)
+    Error_Handler();
 
   /* 启动 CAN */
   if (HAL_CAN_Start(&hcan) != HAL_OK)
@@ -73,11 +89,11 @@ void can_filter_init(void)
     Error_Handler();
   }
 
-  /* 使能 RX FIFO0 消息挂起中断 */
+  /* 使能 FIFO0 + FIFO1 中断 */
   if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING) != HAL_OK)
-  {
     Error_Handler();
-  }
+  if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO1_MSG_PENDING) != HAL_OK)
+    Error_Handler();
 }
 
 /*============================================================================
@@ -185,6 +201,47 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan_ptr)
       break;
     }
 
+    default:
+      break;
+  }
+}
+
+/*============================================================================
+ * HAL_CAN_RxFifo1MsgPendingCallback - CAN RX FIFO1 中断回调 (双缓冲)
+ *   与 FIFO0 同样的解析逻辑，防止高负载下丢帧
+ *============================================================================*/
+void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan_ptr)
+{
+  CAN_RxHeaderTypeDef rxHeader;
+  uint8_t rxData[8];
+
+  if (HAL_CAN_GetRxMessage(hcan_ptr, CAN_RX_FIFO1, &rxHeader, rxData) != HAL_OK)
+    return;
+
+  if (rxHeader.IDE != CAN_ID_EXT)
+    return;
+
+  switch (rxHeader.ExtId)
+  {
+    case CAN_ID_VCU2MCU:
+    {
+      vcu2mcu_data_t parsed;
+      can_data_parse_vcu2mcu(rxData, &parsed);
+      g_racing_data.speed_rpm       = parsed.speed_rpm;
+      g_racing_data.torque_promille = parsed.torque_promille;
+      g_racing_data.dc_bus_voltage  = parsed.dc_bus_voltage;
+      break;
+    }
+    case CAN_ID_MCU2VCU:
+    {
+      mcu2vcu_data_t parsed;
+      can_data_parse_mcu2vcu(rxData, &parsed);
+      g_racing_data.controller_temp = parsed.controller_temp;
+      g_racing_data.motor_temp      = parsed.motor_temp;
+      g_racing_data.dc_bus_voltage  = parsed.dc_bus_voltage;
+      g_racing_data.dc_bus_current  = parsed.dc_bus_current;
+      break;
+    }
     default:
       break;
   }

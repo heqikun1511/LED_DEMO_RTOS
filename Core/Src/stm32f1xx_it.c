@@ -58,6 +58,7 @@
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim5;
 extern TIM_HandleTypeDef htim6;
+extern CAN_HandleTypeDef hcan;
 
 /* USER CODE BEGIN EV */
 
@@ -204,5 +205,21 @@ void TIM6_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+
+/**
+  * @brief This function handles USB LP and CAN1 RX0 interrupt.
+  */
+void USB_LP_CAN1_RX0_IRQHandler(void)
+{
+  HAL_CAN_IRQHandler(&hcan);
+}
+
+/**
+  * @brief This function handles CAN1 RX1 interrupt.
+  */
+void CAN1_RX1_IRQHandler(void)
+{
+  HAL_CAN_IRQHandler(&hcan);
+}
 
 /* USER CODE END 1 */
