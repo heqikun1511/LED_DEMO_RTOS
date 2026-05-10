@@ -2,6 +2,7 @@
 #include "bsp_can.h"
 #include "can_data.h"
 #include <string.h>
+#include <stdio.h>
 #include "can.h"
 
 /*============================================================================
@@ -27,24 +28,21 @@ void can_filter_init(void)
   CAN_FilterTypeDef filter = {0};
 
   /*
-   * STM32F1 CAN filter 工作在 32-bit mask 模式:
+   * STM32F1 CAN filter 工作在 16-bit mask 模式:
    *   FilterIdHigh : ID[28:13] (扩展帧高16位)
-   *   FilterIdLow  : ID[12:0] << 3 + IDE + RTR  (扩展帧低16位)
+   *   FilterIdLow  : (ID[12:0] << 3) | (IDE << 2) | (RTR << 1)
+   *   MaskIdHigh   : 高16位 mask (0xFFFF = 精确匹配)
+   *   MaskIdLow    : 低16位 mask (0xFFFC = 匹配ID和IDE, 忽略RTR)
    *
    * 这里使用两个 filter 分别接收两个 ID
    */
 
   /* --- Filter 0: 接收 VCU→MCU (0x08C1EF21) --- */
   filter.FilterBank = 0;
-  filter.FilterMode = CAN_FILTERMODE_IDLIST; /* 列表模式(精确匹配) */
-  filter.FilterScale = CAN_FILTERSCALE_32BIT;
-  /* 扩展帧 ID 在寄存器中的布局:
-   *   STDID[10:0] @ Bit[31:21], EXTID[17:13] @ Bit[20:16],
-   *   EXTID[12:0] @ Bit[15:3], IDE @ Bit[2], RTR @ Bit[1]
-   * 简化方法: 使用 CAN_FILTERSCALE_16BIT + 双 filter 分别匹配高低16位
-   */
+  filter.FilterMode = CAN_FILTERMODE_IDMASK;
+  filter.FilterScale = CAN_FILTERSCALE_16BIT;
   filter.FilterIdHigh = (uint16_t)(CAN_ID_VCU2MCU >> 13); /* ID[28:13] */
-  filter.FilterIdLow = (uint16_t)((CAN_ID_VCU2MCU << 3) | (0x02 << 2) | (0x00 << 1));
+  filter.FilterIdLow = (uint16_t)((CAN_ID_VCU2MCU << 3) | CAN_ID_EXT);
   /* ID[12:0] << 3 | IDE=1(扩展) */
   filter.FilterMaskIdHigh = 0xFFFF; /* mask 全1 = 精确匹配 */
   filter.FilterMaskIdLow = 0xFFFC;  /* 只匹配 ID+IDE, 忽略 RTR */
@@ -60,7 +58,7 @@ void can_filter_init(void)
   /* --- Filter 1: 接收 MCU→VCU (0x0CFFC7EF) → FIFO0 --- */
   filter.FilterBank = 1;
   filter.FilterIdHigh = (uint16_t)(CAN_ID_MCU2VCU >> 13);
-  filter.FilterIdLow = (uint16_t)((CAN_ID_MCU2VCU << 3) | (0x02 << 2));
+  filter.FilterIdLow = (uint16_t)((CAN_ID_MCU2VCU << 3) | CAN_ID_EXT);
   filter.FilterFIFOAssignment = CAN_RX_FIFO0;
 
   if (HAL_CAN_ConfigFilter(&hcan, &filter) != HAL_OK)
@@ -71,14 +69,14 @@ void can_filter_init(void)
   /* --- Filter 2: 同样两个 ID 镜像到 FIFO1 (双缓冲防丢帧) --- */
   filter.FilterBank = 2;
   filter.FilterIdHigh = (uint16_t)(CAN_ID_VCU2MCU >> 13);
-  filter.FilterIdLow = (uint16_t)((CAN_ID_VCU2MCU << 3) | (0x02 << 2));
+  filter.FilterIdLow = (uint16_t)((CAN_ID_VCU2MCU << 3) | CAN_ID_EXT);
   filter.FilterFIFOAssignment = CAN_RX_FIFO1;
   if (HAL_CAN_ConfigFilter(&hcan, &filter) != HAL_OK)
     Error_Handler();
 
   filter.FilterBank = 3;
   filter.FilterIdHigh = (uint16_t)(CAN_ID_MCU2VCU >> 13);
-  filter.FilterIdLow = (uint16_t)((CAN_ID_MCU2VCU << 3) | (0x02 << 2));
+  filter.FilterIdLow = (uint16_t)((CAN_ID_MCU2VCU << 3) | CAN_ID_EXT);
   filter.FilterFIFOAssignment = CAN_RX_FIFO1;
   if (HAL_CAN_ConfigFilter(&hcan, &filter) != HAL_OK)
     Error_Handler();
@@ -94,6 +92,9 @@ void can_filter_init(void)
     Error_Handler();
   if (HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO1_MSG_PENDING) != HAL_OK)
     Error_Handler();
+
+  printf("[CAN] 过滤器初始化完成: ID1=0x%08lX, ID2=0x%08lX, 500Kbps\r\n",
+         (unsigned long)CAN_ID_VCU2MCU, (unsigned long)CAN_ID_MCU2VCU);
 }
 
 /*============================================================================

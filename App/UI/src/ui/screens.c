@@ -7,6 +7,7 @@
 #include "vars.h"
 #include "styles.h"
 #include "ui.h"
+#include "bsp_can.h"
 
 #include <string.h>
 
@@ -304,6 +305,8 @@ void create_screen_menu() {
 }
 
 void tick_screen_menu() {
+  /* 从 CAN 接收数据更新 RPM 显示 */
+  lv_label_set_text_fmt(objects.rpm_value, "%d", g_racing_data.speed_rpm);
 }
 
 typedef void (*tick_screen_func_t)();
@@ -399,7 +402,8 @@ uint32_t active_theme_index = 0;
 //
 //
 
-void create_screens() {
+void create_screens() 
+{
 
 // Set default LVGL theme
     lv_display_t *dispp = lv_display_get_default();
