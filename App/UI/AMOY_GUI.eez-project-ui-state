@@ -194,6 +194,7 @@
               "type": "tabset",
               "id": "EDITORS",
               "weight": 53.35113902713788,
+              "selected": 1,
               "enableDeleteWhenEmpty": false,
               "enableClose": false,
               "children": [
@@ -1085,7 +1086,7 @@
       "transform": {
         "translate": {
           "x": -365.4557857513428,
-          "y": 763.5000240325935
+          "y": 1483.5000411987319
         },
         "scale": 1
       },

@@ -74,7 +74,10 @@ Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.c \
 App/Src/interrupt_demo.c \
 App/Src/lcd_demo.c \
 App/Src/lvgl_demo.c \
+App/Src/uart_demo.c \
+App/Src/freertos_demo.c \
 Drivers/BSP/Src/bsp_can.c \
+Drivers/BSP/Src/servo_hal.c \
 Drivers/BSP/Src/can_data.c \
 Drivers/BSP/Src/delay.c \
 Drivers/BSP/Src/lcd.c \
@@ -92,7 +95,9 @@ Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_nand.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pccard.c \
 Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_can.c \
 Drivers/SRAM/sram.c \
-Core/Src/can.c
+Core/Src/can.c \
+../HARDWARE/uart_servo/uart_servo_lite.c \
+../HARDWARE/ring_buffer/ring_buffer.c
 
 # ASM sources
 ASM_SOURCES =  \
@@ -181,7 +186,9 @@ C_INCLUDES =  \
 -IMiddlewares/Third_Party/LVGL \
 -IMiddlewares/Third_Party/LVGL/lvgl \
 -IMiddlewares/Third_Party/LVGL/lvgl/src \
--IDrivers/SRAM
+-IDrivers/SRAM \
+-I../HARDWARE/uart_servo \
+-I../HARDWARE/ring_buffer
 
 
 # compile gcc flags

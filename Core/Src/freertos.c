@@ -27,6 +27,8 @@
 /* USER CODE BEGIN Includes */
 #include "interrupt_demo.h"
 #include "lvgl_demo.h"
+#include "uart_demo.h"
+#include "freertos_demo.h"
 #include "tim.h"
 #include "delay.h"
 /* USER CODE END Includes */
@@ -64,6 +66,13 @@ const osThreadAttr_t lvglTask_attributes = {
   .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for uartTask */
+osThreadId_t uartTaskHandle;
+const osThreadAttr_t uartTask_attributes = {
+  .name = "uartTask",
+  .stack_size = 256 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -72,6 +81,12 @@ const osThreadAttr_t lvglTask_attributes = {
 
 void StartSumupTask(void *argument);
 void StartlvglTask(void *argument);
+void StartUartTask(void *argument);
+
+/* FreeRTOS 原生 API 创建的任务 */
+TaskHandle_t servoTaskHandle = NULL;
+
+void StartServoTask(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -137,8 +152,20 @@ void MX_FREERTOS_Init(void) {
   /* creation of lvglTask */
   lvglTaskHandle = osThreadNew(StartlvglTask, NULL, &lvglTask_attributes);
 
+  /* creation of uartTask */
+  uartTaskHandle = osThreadNew(StartUartTask, NULL, &uartTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
+  /* 使用 xTaskCreate (原生 FreeRTOS API) 创建舵机控制任务 */
+  xTaskCreate(
+    StartServoTask,       /* 任务函数 */
+    "servoTask",          /* 任务名 */
+    512,                  /* 栈大小 (word) */
+    NULL,                 /* 参数 */
+    osPriorityNormal,     /* 优先级 */
+    &servoTaskHandle      /* 任务句柄 */
+  );
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -175,6 +202,35 @@ void StartlvglTask(void *argument)
   /* Infinite loop */
   lvgl_demo_task(argument);
   /* USER CODE END StartlvglTask */
+}
+
+/* USER CODE BEGIN Header_StartUartTask */
+/**
+* @brief Function implementing the uartTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartUartTask */
+void StartUartTask(void *argument)
+{
+  /* USER CODE BEGIN StartUartTask */
+  /* Infinite loop */
+  uart_demo_task(argument);
+  /* USER CODE END StartUartTask */
+}
+
+/* USER CODE BEGIN Header_StartServoTask */
+/**
+* @brief Function implementing the servoTask thread (created via xTaskCreate).
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartServoTask */
+void StartServoTask(void *argument)
+{
+  /* USER CODE BEGIN StartServoTask */
+  freertos_servo_task(argument);
+  /* USER CODE END StartServoTask */
 }
 
 /* Private application code --------------------------------------------------*/
